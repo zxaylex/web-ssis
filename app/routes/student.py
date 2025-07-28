@@ -1,5 +1,5 @@
 from ..service import csrf, mysql
-from flask import Blueprint
+from flask import Blueprint, render_template
 
 student_bp = Blueprint('student', __name__, url_prefix='/student')
 
@@ -10,4 +10,4 @@ def get_student(student_id: str):
 
 @student_bp.route('/')
 def index():
-    return "Welcome to Student Portal"
+    return render_template('student.jinja2')
