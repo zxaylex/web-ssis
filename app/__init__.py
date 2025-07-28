@@ -1,5 +1,5 @@
 from flask import Flask
-from config import Config
+from .config import Config
 from .service import csrf, mysql
 
 from .routes.student import student_bp
