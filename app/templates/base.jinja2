@@ -1,0 +1,19 @@
+<html>
+<head>
+    <title>{% block title %}Welcome{% endblock %}</title>
+</head>
+<body>
+    <header>
+        <h1>{% block header %}Welcome to the Student Portal{% endblock %}</h1>
+    </header>
+    <main>
+        {% block content %}
+            <p>This is the main content area.</p>
+        {% endblock %}
+    </main>
+    <footer>
+        <p>&copy; 2023 Student Portal</p>
+    </footer>
+
+</body>
+</html>
