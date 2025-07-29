@@ -3,21 +3,35 @@ from ..service import mysql
 # student model
 class Student:
     def __init__(self):
-        id_number: str = None
-        profile_url: str = None
-        first_name: str = None 
-        last_name: str = None
-        program: str = None
-        year_level: int = None
-        gender: str = None 
-        
-    def __init__(self, id_number, profile_usel, first_name, last_name, program, year):
+        self.id_number: str = None
+        self.profile_url: str = None
+        self.first_name: str = None 
+        self.last_name: str = None
+        self.program: str = None
+        self.year_level: int = None
+        self.gender: str = None 
+
+    def __init__(self, id_number: str):
         self.id_number = id_number
-        self.profile_usel = profile_usel
+        self.profile_url = None
+        self.first_name = None
+        self.last_name = None
+        self.program = None
+        self.year_level = None
+        self.gender = None
+
+    def __init__(self, id_number, profile_url, first_name, last_name, program, year_level, gender):
+        self.id_number = id_number
+        self.profile_usel = profile_url
         self.first_name = first_name
         self.last_name = last_name
         self.program = program
-        self.year_level = year
+        self.year_level = year_level
+        self.gender = gender
+
+    def set(self, id_number):
+        self.id_number = id_number
+        return self.get()
         
     def insert(self):
         sql = "INSERT INTO students (id_number, profile_url, first_name, last_name, program, year_level, gender) VALUES (%s, %s, %s, %s, %s, %s, %s)"
