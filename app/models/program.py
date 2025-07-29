@@ -10,6 +10,14 @@ class Program:
         self.code: str = None
         self.name: str = None
         self.college: str = None
+
+    def __init__(self, code: str):
+        self.code = code
+        self.name = None
+        self.college = None
+
+    def fetch(self):
+        return self.get()
         
     def insert(self):
         sql = "INSERT INTO programs (code, name, college) VALUES (%s, %s, %s)"

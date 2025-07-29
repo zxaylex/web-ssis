@@ -29,8 +29,7 @@ class Student:
         self.year_level = year_level
         self.gender = gender
 
-    def set(self, id_number):
-        self.id_number = id_number
+    def fetch(self):
         return self.get()
         
     def insert(self):
