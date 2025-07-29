@@ -1,7 +1,7 @@
 from ..service import csrf, mysql
 
 class Program:
-    def __init__(self, code: string, name: string, college: string):
+    def __init__(self, code: str, name: str, college: str):
         self.code = code
         self.name = name
         self.college = college
