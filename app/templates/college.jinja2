@@ -1,0 +1,443 @@
+{% extends "base.jinja2" %}
+
+{% block title %}College Management{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="bi bi-building-fill"></i> College Management</h2>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addCollegeModal">
+                <i class="bi bi-plus-circle"></i> Add New College
+            </button>
+        </div>
+
+        <!-- Search Section -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-8">
+                        <label for="searchInput" class="form-label">Search Colleges</label>
+                        <input type="text" class="form-control" id="searchInput" placeholder="Search by name or code...">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">&nbsp;</label>
+                        <button class="btn btn-outline-secondary w-100" id="clearFilters">
+                            <i class="bi bi-x-circle"></i> Clear Search
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Colleges Table -->
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover" id="collegesTable">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Code</th>
+                                <th>Name</th>
+                                <th>Programs Count</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="collegesTableBody">
+                            <!-- Colleges will be loaded here via AJAX -->
+                        </tbody>
+                    </table>
+                </div>
+                <div id="loadingSpinner" class="text-center d-none">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+                <div id="noCollegesMessage" class="text-center d-none">
+                    <p class="text-muted">No colleges found.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add College Modal -->
+<div class="modal fade" id="addCollegeModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add New College</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addCollegeForm">
+                    <div class="mb-3">
+                        <label for="code" class="form-label">College Code *</label>
+                        <input type="text" class="form-control" id="code" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="name" class="form-label">College Name *</label>
+                        <input type="text" class="form-control" id="name" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="saveCollegeBtn">Save College</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit College Modal -->
+<div class="modal fade" id="editCollegeModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit College</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editCollegeForm">
+                    <input type="hidden" id="editCode">
+                    <div class="mb-3">
+                        <label for="editName" class="form-label">College Name *</label>
+                        <input type="text" class="form-control" id="editName" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="updateCollegeBtn">Update College</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteCollegeModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Delete</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete this college?</p>
+                <p class="text-danger"><strong>This action cannot be undone.</strong></p>
+                <p class="text-warning"><i class="bi bi-exclamation-triangle"></i> Warning: Deleting a college will also delete all associated programs.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- College Details Modal -->
+<div class="modal fade" id="collegeDetailsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">College Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="collegeDetailsContent">
+                    <!-- College details will be loaded here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+$(document).ready(function() {
+    let currentCollegeCode = null;
+    let allColleges = [];
+    let allPrograms = [];
+
+    // Load initial data
+    loadColleges();
+    loadPrograms();
+
+    // Search functionality
+    $('#searchInput').on('input', filterColleges);
+    $('#clearFilters').on('click', clearFilters);
+
+    // Add college functionality
+    $('#saveCollegeBtn').on('click', addCollege);
+
+    // Edit college functionality
+    $('#updateCollegeBtn').on('click', updateCollege);
+
+    // Delete college functionality
+    $('#confirmDeleteBtn').on('click', deleteCollege);
+
+    function loadColleges() {
+        showLoading(true);
+        $.ajax({
+            url: '/college/api/',
+            method: 'GET',
+            success: function(data) {
+                allColleges = data;
+                displayColleges(data);
+                showLoading(false);
+            },
+            error: function(xhr) {
+                showError('Failed to load colleges: ' + xhr.responseText);
+                showLoading(false);
+            }
+        });
+    }
+
+    function loadPrograms() {
+        $.ajax({
+            url: '/program/api/',
+            method: 'GET',
+            success: function(data) {
+                allPrograms = data;
+            },
+            error: function(xhr) {
+                showError('Failed to load programs: ' + xhr.responseText);
+            }
+        });
+    }
+
+    function displayColleges(colleges) {
+        const tbody = $('#collegesTableBody');
+        tbody.empty();
+
+        if (colleges.length === 0) {
+            $('#noCollegesMessage').removeClass('d-none');
+            return;
+        }
+
+        $('#noCollegesMessage').addClass('d-none');
+
+        colleges.forEach(function(college) {
+            const programsCount = allPrograms.filter(p => p.college === college.code).length;
+            const row = `
+                <tr>
+                    <td><strong>${college.code}</strong></td>
+                    <td>${college.name}</td>
+                    <td>
+                        <span class="badge bg-info">${programsCount} programs</span>
+                    </td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-info view-btn" data-code="${college.code}">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-primary edit-btn" data-code="${college.code}">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger delete-btn" data-code="${college.code}">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `;
+            tbody.append(row);
+        });
+
+        // Attach event handlers
+        $('.view-btn').on('click', function() {
+            const collegeCode = $(this).data('code');
+            viewCollegeDetails(collegeCode);
+        });
+
+        $('.edit-btn').on('click', function() {
+            const collegeCode = $(this).data('code');
+            editCollege(collegeCode);
+        });
+
+        $('.delete-btn').on('click', function() {
+            const collegeCode = $(this).data('code');
+            showDeleteConfirmation(collegeCode);
+        });
+    }
+
+    function filterColleges() {
+        const searchTerm = $('#searchInput').val().toLowerCase();
+
+        const filtered = allColleges.filter(college => {
+            return !searchTerm || 
+                college.name.toLowerCase().includes(searchTerm) ||
+                college.code.toLowerCase().includes(searchTerm);
+        });
+
+        displayColleges(filtered);
+    }
+
+    function clearFilters() {
+        $('#searchInput').val('');
+        displayColleges(allColleges);
+    }
+
+    function addCollege() {
+        const collegeData = {
+            code: $('#code').val(),
+            name: $('#name').val()
+        };
+
+        $.ajax({
+            url: '/college/create',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(collegeData),
+            success: function(data) {
+                $('#addCollegeModal').modal('hide');
+                $('#addCollegeForm')[0].reset();
+                showSuccess('College added successfully!');
+                loadColleges();
+            },
+            error: function(xhr) {
+                showError('Failed to add college: ' + xhr.responseText);
+            }
+        });
+    }
+
+    function editCollege(collegeCode) {
+        const college = allColleges.find(c => c.code === collegeCode);
+        if (!college) return;
+
+        $('#editCode').val(college.code);
+        $('#editName').val(college.name);
+
+        $('#editCollegeModal').modal('show');
+    }
+
+    function updateCollege() {
+        const collegeData = {
+            name: $('#editName').val()
+        };
+
+        const collegeCode = $('#editCode').val();
+
+        $.ajax({
+            url: `/college/${collegeCode}`,
+            method: 'PUT',
+            contentType: 'application/json',
+            data: JSON.stringify(collegeData),
+            success: function(data) {
+                $('#editCollegeModal').modal('hide');
+                showSuccess('College updated successfully!');
+                loadColleges();
+            },
+            error: function(xhr) {
+                showError('Failed to update college: ' + xhr.responseText);
+            }
+        });
+    }
+
+    function viewCollegeDetails(collegeCode) {
+        const college = allColleges.find(c => c.code === collegeCode);
+        const programs = allPrograms.filter(p => p.college === collegeCode);
+
+        let programsHtml = '';
+        if (programs.length > 0) {
+            programsHtml = `
+                <div class="mt-3">
+                    <h6>Programs in this College:</h6>
+                    <ul class="list-group">
+                        ${programs.map(program => `
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>${program.code}</strong> - ${program.name}
+                                </div>
+                            </li>
+                        `).join('')}
+                    </ul>
+                </div>
+            `;
+        } else {
+            programsHtml = '<p class="text-muted mt-3">No programs found in this college.</p>';
+        }
+
+        const content = `
+            <div class="row">
+                <div class="col-md-6">
+                    <h6>College Code:</h6>
+                    <p><strong>${college.code}</strong></p>
+                </div>
+                <div class="col-md-6">
+                    <h6>College Name:</h6>
+                    <p><strong>${college.name}</strong></p>
+                </div>
+            </div>
+            ${programsHtml}
+        `;
+
+        $('#collegeDetailsContent').html(content);
+        $('#collegeDetailsModal').modal('show');
+    }
+
+    function showDeleteConfirmation(collegeCode) {
+        currentCollegeCode = collegeCode;
+        $('#deleteCollegeModal').modal('show');
+    }
+
+    function deleteCollege() {
+        if (!currentCollegeCode) return;
+
+        $.ajax({
+            url: `/college/${currentCollegeCode}`,
+            method: 'DELETE',
+            success: function(data) {
+                $('#deleteCollegeModal').modal('hide');
+                showSuccess('College deleted successfully!');
+                loadColleges();
+                currentCollegeCode = null;
+            },
+            error: function(xhr) {
+                showError('Failed to delete college: ' + xhr.responseText);
+            }
+        });
+    }
+
+    function showLoading(show) {
+        if (show) {
+            $('#loadingSpinner').removeClass('d-none');
+            $('#collegesTable').addClass('d-none');
+        } else {
+            $('#loadingSpinner').addClass('d-none');
+            $('#collegesTable').removeClass('d-none');
+        }
+    }
+
+    function showSuccess(message) {
+        const alert = `
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        `;
+        $('main').prepend(alert);
+        
+        setTimeout(() => {
+            $('.alert').alert('close');
+        }, 3000);
+    }
+
+    function showError(message) {
+        const alert = `
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        `;
+        $('main').prepend(alert);
+        
+        setTimeout(() => {
+            $('.alert').alert('close');
+        }, 5000);
+    }
+});
+</script>
+{% endblock %}

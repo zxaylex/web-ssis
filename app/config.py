@@ -10,7 +10,7 @@ class Config:
     MYSQL_DATABASE_USER = getenv("MYSQL_DATABASE_USER", "admin")
     MYSQL_DATABASE_PASSWORD = getenv("MYSQL_DATABASE_PASSWORD", "admin123")
     MYSQL_DATABASE_PORT = int(getenv("MYSQL_DATABASE_PORT", 3306))
-    MYSQL_DATABASE_DB = getenv("MYSQL_DATABASE_DB", "ssis_db")
+    MYSQL_DATABASE_DB = getenv("MYSQL_DATABASE_DB", "student_system")
     CSRF_ENABLED = True
     CSRF_SESSION_KEY = getenv("CSRF_SESSION_KEY", "csrf-secret-key")
     

@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, render_template
 from .config import Config
 from .service import csrf, mysql
 
@@ -16,5 +16,9 @@ def create_app():
     app.register_blueprint(student_bp)
     app.register_blueprint(program_bp)
     app.register_blueprint(college_bp)
+    
+    @app.route('/')
+    def home():
+        return render_template('dashboard.jinja2')
     
     return app

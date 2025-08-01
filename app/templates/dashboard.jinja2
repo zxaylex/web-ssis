@@ -1,0 +1,271 @@
+{% extends "base.jinja2" %}
+
+{% block title %}Dashboard - Student Information System{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="jumbotron bg-light p-5 rounded">
+            <h1 class="display-4">Welcome to Student Information System</h1>
+            <p class="lead">Manage students, programs, and colleges with ease.</p>
+            <hr class="my-4">
+            <p>Choose from the navigation menu above to get started.</p>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="bi bi-people-fill text-primary" style="font-size: 3rem;"></i>
+                <h5 class="card-title mt-3">Students</h5>
+                <p class="card-text" id="studentCount">Loading...</p>
+                <a href="/student/" class="btn btn-primary">Manage Students</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="bi bi-book-fill text-success" style="font-size: 3rem;"></i>
+                <h5 class="card-title mt-3">Programs</h5>
+                <p class="card-text" id="programCount">Loading...</p>
+                <a href="/program/" class="btn btn-success">Manage Programs</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="bi bi-building-fill text-info" style="font-size: 3rem;"></i>
+                <h5 class="card-title mt-3">Colleges</h5>
+                <p class="card-text" id="collegeCount">Loading...</p>
+                <a href="/college/" class="btn btn-info">Manage Colleges</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-graph-up"></i> Quick Statistics</h5>
+            </div>
+            <div class="card-body">
+                <div id="statisticsContent">
+                    <div class="text-center">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-2">Loading statistics...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-clock-history"></i> Recent Activity</h5>
+            </div>
+            <div class="card-body">
+                <div class="list-group list-group-flush">
+                    <div class="list-group-item">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">System Ready</h6>
+                            <small class="text-muted">Just now</small>
+                        </div>
+                        <p class="mb-1">Student Information System is online and ready to use.</p>
+                    </div>
+                    <div class="list-group-item">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">Database Connected</h6>
+                            <small class="text-muted">Just now</small>
+                        </div>
+                        <p class="mb-1">MySQL database connection established successfully.</p>
+                    </div>
+                    <div class="list-group-item">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">API Endpoints Active</h6>
+                            <small class="text-muted">Just now</small>
+                        </div>
+                        <p class="mb-1">All REST API endpoints are available and functional.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-info-circle"></i> System Information</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Features</h6>
+                        <ul class="list-unstyled">
+                            <li><i class="bi bi-check-circle text-success"></i> Student Management (CRUD)</li>
+                            <li><i class="bi bi-check-circle text-success"></i> Program Management (CRUD)</li>
+                            <li><i class="bi bi-check-circle text-success"></i> College Management (CRUD)</li>
+                            <li><i class="bi bi-check-circle text-success"></i> Search and Filter Functionality</li>
+                            <li><i class="bi bi-check-circle text-success"></i> Responsive Web Interface</li>
+                            <li><i class="bi bi-check-circle text-success"></i> RESTful API</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Technology Stack</h6>
+                        <ul class="list-unstyled">
+                            <li><i class="bi bi-code-slash text-primary"></i> Backend: Flask (Python)</li>
+                            <li><i class="bi bi-database text-primary"></i> Database: MySQL</li>
+                            <li><i class="bi bi-window text-primary"></i> Frontend: Bootstrap 5</li>
+                            <li><i class="bi bi-gear text-primary"></i> JavaScript: jQuery</li>
+                            <li><i class="bi bi-file-earmark-code text-primary"></i> Templates: Jinja2</li>
+                            <li><i class="bi bi-arrow-repeat text-primary"></i> AJAX for Dynamic Content</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+$(document).ready(function() {
+    // Load dashboard statistics
+    loadDashboardStats();
+    
+    function loadDashboardStats() {
+        // Load student count
+        $.ajax({
+            url: '/student/api/',
+            method: 'GET',
+            success: function(data) {
+                $('#studentCount').text(data.length + ' students');
+            },
+            error: function() {
+                $('#studentCount').text('Error loading');
+            }
+        });
+        
+        // Load program count
+        $.ajax({
+            url: '/program/api/',
+            method: 'GET',
+            success: function(data) {
+                $('#programCount').text(data.length + ' programs');
+            },
+            error: function() {
+                $('#programCount').text('Error loading');
+            }
+        });
+        
+        // Load college count
+        $.ajax({
+            url: '/college/api/',
+            method: 'GET',
+            success: function(data) {
+                $('#collegeCount').text(data.length + ' colleges');
+            },
+            error: function() {
+                $('#collegeCount').text('Error loading');
+            }
+        });
+        
+        // Load detailed statistics
+        loadDetailedStats();
+    }
+    
+    function loadDetailedStats() {
+        $.when(
+            $.ajax({ url: '/student/api/', method: 'GET' }),
+            $.ajax({ url: '/program/api/', method: 'GET' }),
+            $.ajax({ url: '/college/api/', method: 'GET' })
+        ).done(function(studentData, programData, collegeData) {
+            const students = studentData[0];
+            const programs = programData[0];
+            const colleges = collegeData[0];
+            
+            // Calculate statistics
+            const totalStudents = students.length;
+            const totalPrograms = programs.length;
+            const totalColleges = colleges.length;
+            
+            // Count students by year level
+            const yearLevels = {};
+            students.forEach(student => {
+                const year = student.year_level || 'Unknown';
+                yearLevels[year] = (yearLevels[year] || 0) + 1;
+            });
+            
+            // Count students by gender
+            const genderCount = {};
+            students.forEach(student => {
+                const gender = student.gender || 'Unknown';
+                genderCount[gender] = (genderCount[gender] || 0) + 1;
+            });
+            
+            // Count programs by college
+            const programsByCollege = {};
+            programs.forEach(program => {
+                const college = program.college || 'Unknown';
+                programsByCollege[college] = (programsByCollege[college] || 0) + 1;
+            });
+            
+            // Display statistics
+            const statsHtml = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Student Distribution</h6>
+                        <ul class="list-unstyled">
+                            <li>Total Students: <strong>${totalStudents}</strong></li>
+                            <li>Male: <strong>${genderCount.male || 0}</strong></li>
+                            <li>Female: <strong>${genderCount.female || 0}</strong></li>
+                        </ul>
+                        <h6 class="mt-3">Year Level Distribution</h6>
+                        <ul class="list-unstyled">
+                            ${Object.entries(yearLevels).map(([year, count]) => 
+                                `<li>Year ${year}: <strong>${count}</strong></li>`
+                            ).join('')}
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Academic Structure</h6>
+                        <ul class="list-unstyled">
+                            <li>Total Colleges: <strong>${totalColleges}</strong></li>
+                            <li>Total Programs: <strong>${totalPrograms}</strong></li>
+                            <li>Avg Programs/College: <strong>${(totalPrograms / totalColleges).toFixed(1)}</strong></li>
+                        </ul>
+                        <h6 class="mt-3">Top Colleges by Programs</h6>
+                        <ul class="list-unstyled">
+                            ${Object.entries(programsByCollege)
+                                .sort(([,a], [,b]) => b - a)
+                                .slice(0, 3)
+                                .map(([college, count]) => 
+                                    `<li>${college}: <strong>${count}</strong> programs</li>`
+                                ).join('')}
+                        </ul>
+                    </div>
+                </div>
+            `;
+            
+            $('#statisticsContent').html(statsHtml);
+        }).fail(function() {
+            $('#statisticsContent').html(`
+                <div class="alert alert-warning">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    Unable to load statistics. Please check your connection.
+                </div>
+            `);
+        });
+    }
+});
+</script>
+{% endblock %} 
